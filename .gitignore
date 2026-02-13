@@ -8,4 +8,8 @@
 .kotlin
 
 # Ignore Gradle build output directory
-build
+build.cxx/
+build/
+.gradle/
+*.apk
+*.aar

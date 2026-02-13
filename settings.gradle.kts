@@ -16,4 +16,6 @@ dependencyResolutionManagement {
 
 rootProject.name = "Gametux"
 
-include(":app")
+include(":console")
+include(":display")
+include(":core")
