@@ -1,7 +1,0 @@
-[
-{
-  "directory": "/app/console/.cxx/Debug/68z40473/x86_64",
-  "command": "/opt/android-sdk/ndk/27.0.12077973/toolchains/llvm/prebuilt/linux-x86_64/bin/clang++ --target=x86_64-none-linux-android26 --sysroot=/opt/android-sdk/ndk/27.0.12077973/toolchains/llvm/prebuilt/linux-x86_64/sysroot -Dgametux_core_EXPORTS -g -DANDROID -fdata-sections -ffunction-sections -funwind-tables -fstack-protector-strong -no-canonical-prefixes -D_FORTIFY_SOURCE=2 -Wformat -Werror=format-security   -fno-limit-debug-info  -fPIC -o CMakeFiles/gametux_core.dir/gametux_core.cpp.o -c /app/console/src/main/cpp/gametux_core.cpp",
-  "file": "/app/console/src/main/cpp/gametux_core.cpp"
-}
-]
