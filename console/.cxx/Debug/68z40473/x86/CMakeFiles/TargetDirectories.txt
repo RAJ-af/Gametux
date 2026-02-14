@@ -1,0 +1,3 @@
+/app/console/.cxx/Debug/68z40473/x86/CMakeFiles/gametux_core.dir
+/app/console/.cxx/Debug/68z40473/x86/CMakeFiles/edit_cache.dir
+/app/console/.cxx/Debug/68z40473/x86/CMakeFiles/rebuild_cache.dir

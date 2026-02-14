@@ -1,0 +1,27 @@
+{
+  "buildFiles": [
+    "/app/console/src/main/cpp/CMakeLists.txt"
+  ],
+  "cleanCommandsComponents": [
+    [
+      "/opt/android-sdk/cmake/3.22.1/bin/ninja",
+      "-C",
+      "/app/console/.cxx/Debug/68z40473/armeabi-v7a",
+      "clean"
+    ]
+  ],
+  "buildTargetsCommandComponents": [
+    "/opt/android-sdk/cmake/3.22.1/bin/ninja",
+    "-C",
+    "/app/console/.cxx/Debug/68z40473/armeabi-v7a",
+    "{LIST_OF_TARGETS_TO_BUILD}"
+  ],
+  "libraries": {
+    "gametux_core::@6890427a1f51a3e7e1df": {
+      "artifactName": "gametux_core",
+      "abi": "armeabi-v7a",
+      "output": "/app/console/build/intermediates/cxx/Debug/68z40473/obj/armeabi-v7a/libgametux_core.so",
+      "runtimeFiles": []
+    }
+  }
+}

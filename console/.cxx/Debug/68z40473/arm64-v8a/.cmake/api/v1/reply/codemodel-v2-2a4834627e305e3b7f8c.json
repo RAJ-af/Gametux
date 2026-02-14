@@ -1,0 +1,60 @@
+{
+	"configurations" :
+	[
+		{
+			"directories" :
+			[
+				{
+					"build" : ".",
+					"jsonFile" : "directory-.-Debug-f5ebdc15457944623624.json",
+					"minimumCMakeVersion" :
+					{
+						"string" : "3.6.0"
+					},
+					"projectIndex" : 0,
+					"source" : ".",
+					"targetIndexes" :
+					[
+						0
+					]
+				}
+			],
+			"name" : "Debug",
+			"projects" :
+			[
+				{
+					"directoryIndexes" :
+					[
+						0
+					],
+					"name" : "gametux_core",
+					"targetIndexes" :
+					[
+						0
+					]
+				}
+			],
+			"targets" :
+			[
+				{
+					"directoryIndex" : 0,
+					"id" : "gametux_core::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-gametux_core-Debug-c0dbcc9d483360e520fb.json",
+					"name" : "gametux_core",
+					"projectIndex" : 0
+				}
+			]
+		}
+	],
+	"kind" : "codemodel",
+	"paths" :
+	{
+		"build" : "/app/console/.cxx/Debug/68z40473/arm64-v8a",
+		"source" : "/app/console/src/main/cpp"
+	},
+	"version" :
+	{
+		"major" : 2,
+		"minor" : 3
+	}
+}
