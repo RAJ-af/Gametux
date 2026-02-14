@@ -5,11 +5,6 @@ plugins {
 }
 
 android {
-    externalNativeBuild {
-        cmake {
-            path = file("src/main/cpp/CMakeLists.txt")
-        }
-    }
     namespace = "com.gametux.console"
     compileSdk = 36
 
