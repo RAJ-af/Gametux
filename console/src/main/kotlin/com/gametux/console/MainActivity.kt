@@ -30,6 +30,7 @@ import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.view.WindowCompat
 import com.gametux.console.service.ConsoleService
 
 class MainActivity : ComponentActivity() {
@@ -57,6 +58,7 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        WindowCompat.setDecorFitsSystemWindows(window, false)
         startAndBindService()
 
         setContent {
@@ -94,9 +96,9 @@ class MainActivity : ComponentActivity() {
                 .background(
                     Brush.verticalGradient(
                         colors = listOf(
-                            Color(0xFF0F0F13),
-                            Color(0xFF161620),
-                            Color(0xFF0F0F13)
+                            Color(0xFF0B0B0E),
+                            Color(0xFF161622),
+                            Color(0xFF0B0B0E)
                         )
                     )
                 )
@@ -104,26 +106,105 @@ class MainActivity : ComponentActivity() {
             Column(
                 modifier = Modifier
                     .fillMaxSize()
+                    .systemBarsPadding()
                     .padding(horizontal = 24.dp)
             ) {
-                Spacer(modifier = Modifier.height(64.dp))
+                Spacer(modifier = Modifier.height(48.dp))
 
-                // HEADER
-                HeaderSection()
-
-                Spacer(modifier = Modifier.height(32.dp))
-
-                // CONNECTION STATUS
-                ConnectionStatusCard(status)
+                // HEADER SECTION
+                Column {
+                    Text(
+                        text = "Gametux Console",
+                        fontSize = 38.sp,
+                        fontWeight = FontWeight.Black,
+                        color = Color.White,
+                        letterSpacing = (-1.5).sp
+                    )
+                    Text(
+                        text = "Wireless Retro Console",
+                        fontSize = 15.sp,
+                        fontWeight = FontWeight.SemiBold,
+                        color = MaterialTheme.colorScheme.secondary.copy(alpha = 0.8f),
+                        letterSpacing = 0.5.sp
+                    )
+                }
 
                 Spacer(modifier = Modifier.height(40.dp))
 
-                // RECENT GAMES PLACEHOLDER
-                RecentGamesSection()
+                // CONNECTION STATUS CARD
+                Surface(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .border(
+                            width = 1.dp,
+                            brush = Brush.linearGradient(
+                                colors = listOf(
+                                    MaterialTheme.colorScheme.primary.copy(alpha = 0.4f),
+                                    Color.Transparent
+                                )
+                            ),
+                            shape = RoundedCornerShape(24.dp)
+                        ),
+                    color = MaterialTheme.colorScheme.surface.copy(alpha = 0.6f),
+                    shape = RoundedCornerShape(24.dp),
+                    tonalElevation = 4.dp
+                ) {
+                    Row(
+                        modifier = Modifier
+                            .padding(24.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        StatusPulseIndicator(isConnected = status.contains("Connected"))
+                        Spacer(modifier = Modifier.width(20.dp))
+                        Text(
+                            text = status,
+                            fontSize = 17.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = Color.White.copy(alpha = 0.95f)
+                        )
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(48.dp))
+
+                // RECENT GAMES (UI ONLY)
+                Text(
+                    text = "Recent Games",
+                    fontSize = 20.sp,
+                    fontWeight = FontWeight.ExtraBold,
+                    color = Color.White
+                )
+                Spacer(modifier = Modifier.height(20.dp))
+                LazyRow(
+                    horizontalArrangement = Arrangement.spacedBy(16.dp),
+                    contentPadding = PaddingValues(end = 24.dp)
+                ) {
+                    items(4) { index ->
+                        Box(
+                            modifier = Modifier
+                                .size(110.dp, 150.dp)
+                                .clip(RoundedCornerShape(16.dp))
+                                .background(Color.White.copy(alpha = 0.03f))
+                                .border(
+                                    width = 1.dp,
+                                    color = Color.White.copy(alpha = 0.08f),
+                                    shape = RoundedCornerShape(16.dp)
+                                ),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text(
+                                text = "No ROM",
+                                fontSize = 13.sp,
+                                fontWeight = FontWeight.Medium,
+                                color = Color.White.copy(alpha = 0.25f)
+                            )
+                        }
+                    }
+                }
 
                 Spacer(modifier = Modifier.weight(1f))
 
-                // PRIMARY ACTION
+                // PRIMARY ACTION BUTTON
                 PremiumButton(
                     text = "Add ROM",
                     onClick = {
@@ -132,75 +213,19 @@ class MainActivity : ComponentActivity() {
                     }
                 )
 
-                Spacer(modifier = Modifier.height(48.dp))
+                Spacer(modifier = Modifier.height(56.dp))
             }
         }
     }
 
     @Composable
-    fun HeaderSection() {
-        Column {
-            Text(
-                text = "Gametux Console",
-                fontSize = 34.sp,
-                fontWeight = FontWeight.ExtraBold,
-                color = Color.White,
-                letterSpacing = (-1).sp
-            )
-            Text(
-                text = "Wireless Retro Console",
-                fontSize = 14.sp,
-                fontWeight = FontWeight.Medium,
-                color = MaterialTheme.colorScheme.secondary.copy(alpha = 0.7f),
-                letterSpacing = 1.sp
-            )
-        }
-    }
-
-    @Composable
-    fun ConnectionStatusCard(status: String) {
-        Surface(
-            modifier = Modifier
-                .fillMaxWidth()
-                .border(
-                    width = 1.dp,
-                    brush = Brush.horizontalGradient(
-                        colors = listOf(
-                            MaterialTheme.colorScheme.primary.copy(alpha = 0.3f),
-                            Color.Transparent
-                        )
-                    ),
-                    shape = RoundedCornerShape(20.dp)
-                ),
-            color = MaterialTheme.colorScheme.surface.copy(alpha = 0.8f),
-            shape = RoundedCornerShape(20.dp),
-            shadowElevation = 8.dp
-        ) {
-            Row(
-                modifier = Modifier
-                    .padding(20.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                StatusIndicator(isConnected = status.contains("Connected"))
-                Spacer(modifier = Modifier.width(16.dp))
-                Text(
-                    text = status,
-                    fontSize = 16.sp,
-                    fontWeight = FontWeight.SemiBold,
-                    color = Color.White.copy(alpha = 0.9f)
-                )
-            }
-        }
-    }
-
-    @Composable
-    fun StatusIndicator(isConnected: Boolean) {
+    fun StatusPulseIndicator(isConnected: Boolean) {
         val infiniteTransition = rememberInfiniteTransition(label = "pulse")
         val alpha by infiniteTransition.animateFloat(
-            initialValue = 0.3f,
+            initialValue = 0.4f,
             targetValue = 1f,
             animationSpec = infiniteRepeatable(
-                animation = tween(1200, easing = FastOutSlowInEasing),
+                animation = tween(1000, easing = LinearEasing),
                 repeatMode = RepeatMode.Reverse
             ),
             label = "alpha"
@@ -211,48 +236,16 @@ class MainActivity : ComponentActivity() {
         Box(contentAlignment = Alignment.Center) {
             Box(
                 modifier = Modifier
-                    .size(12.dp)
-                    .scale(if (!isConnected) 1f + (1f - alpha) else 1f)
-                    .background(color.copy(alpha = alpha * 0.4f), CircleShape)
+                    .size(14.dp)
+                    .scale(if (!isConnected) 1.5f - (alpha * 0.5f) else 1f)
+                    .background(color.copy(alpha = alpha * 0.3f), CircleShape)
             )
             Box(
                 modifier = Modifier
-                    .size(8.dp)
+                    .size(9.dp)
                     .background(color, CircleShape)
+                    .border(1.dp, Color.White.copy(alpha = 0.2f), CircleShape)
             )
-        }
-    }
-
-    @Composable
-    fun RecentGamesSection() {
-        Column {
-            Text(
-                text = "Recent Games",
-                fontSize = 18.sp,
-                fontWeight = FontWeight.Bold,
-                color = Color.White.copy(alpha = 0.9f)
-            )
-            Spacer(modifier = Modifier.height(16.dp))
-            LazyRow(
-                horizontalArrangement = Arrangement.spacedBy(12.dp)
-            ) {
-                items(3) {
-                    Box(
-                        modifier = Modifier
-                            .size(100.dp, 140.dp)
-                            .clip(RoundedCornerShape(12.dp))
-                            .background(Color.White.copy(alpha = 0.05f))
-                            .border(1.dp, Color.White.copy(alpha = 0.1f), RoundedCornerShape(12.dp)),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Text(
-                            text = "No ROM",
-                            fontSize = 12.sp,
-                            color = Color.White.copy(alpha = 0.3f)
-                        )
-                    }
-                }
-            }
         }
     }
 
@@ -261,22 +254,22 @@ class MainActivity : ComponentActivity() {
         val interactionSource = remember { MutableInteractionSource() }
         val isPressed by interactionSource.collectIsPressedAsState()
         val scale by animateFloatAsState(
-            targetValue = if (isPressed) 0.96f else 1f,
-            animationSpec = spring(dampingRatio = Spring.DampingRatioMediumBouncy),
+            targetValue = if (isPressed) 0.95f else 1f,
+            animationSpec = spring(stiffness = Spring.StiffnessMedium),
             label = "scale"
         )
 
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(60.dp)
+                .height(64.dp)
                 .scale(scale)
-                .clip(RoundedCornerShape(16.dp))
+                .clip(RoundedCornerShape(20.dp))
                 .background(
                     Brush.horizontalGradient(
                         colors = listOf(
                             MaterialTheme.colorScheme.primary,
-                            Color(0xFF6366F1) // Indigo accent
+                            Color(0xFF6366F1)
                         )
                     )
                 )
@@ -289,8 +282,8 @@ class MainActivity : ComponentActivity() {
         ) {
             Text(
                 text = text,
-                fontSize = 18.sp,
-                fontWeight = FontWeight.Bold,
+                fontSize = 19.sp,
+                fontWeight = FontWeight.Black,
                 color = Color.White
             )
         }
