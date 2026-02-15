@@ -5,7 +5,7 @@ plugins {
 
 android {
     namespace = "com.gametux.display"
-    compileSdk = 36
+    compileSdk = 35
 
     defaultConfig {
         applicationId = "com.gametux.display"
