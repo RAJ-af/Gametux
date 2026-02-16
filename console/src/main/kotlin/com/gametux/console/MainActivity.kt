@@ -21,6 +21,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Cast
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Computer
 import androidx.compose.material.icons.filled.Wifi
 import androidx.compose.material3.*
@@ -147,15 +148,15 @@ class MainActivity : ComponentActivity() {
     @Composable
     fun GametuxTheme(content: @Composable () -> Unit) {
         val darkColors = darkColorScheme(
-            background = Color(0xFF000000), // Jet Black
-            surface = Color(0xFF111111), // Subtle Grey Surface
-            surfaceVariant = Color(0xFF1A1A1A), // Focus Surface
-            primary = Color(0xFF00F5FF), // Electric Cyan
-            secondary = Color(0xFF00D1FF), // Deeper Cyan
+            background = Color(0xFF0B0B0F), // Deep Black
+            surface = Color(0xFF15151D), // Card Background
+            surfaceVariant = Color(0xFF1E1E28), // Lighter surface for variants
+            primary = Color(0xFF00E5FF), // Electric Cyan Accent
+            secondary = Color(0xFF9AA0A6), // Soft Gray
             onBackground = Color.White,
             onSurface = Color.White,
             onPrimary = Color.Black,
-            outline = Color.White.copy(alpha = 0.1f)
+            outline = Color.White.copy(alpha = 0.05f)
         )
         MaterialTheme(colorScheme = darkColors, content = content)
     }
@@ -175,17 +176,31 @@ class MainActivity : ComponentActivity() {
                 .fillMaxSize()
                 .background(Color.Black)
         ) {
-            // Background subtle gradient
+            // Background console-style gradient/glow
             Box(
                 modifier = Modifier
                     .fillMaxSize()
                     .background(
+                        Brush.verticalGradient(
+                            colors = listOf(
+                                Color(0xFF0F0F15),
+                                Color(0xFF0B0B0F)
+                            )
+                        )
+                    )
+            )
+
+            // Subtle accent glow in the corner
+            Box(
+                modifier = Modifier
+                    .size(600.dp)
+                    .offset(x = (-200).dp, y = (-200).dp)
+                    .background(
                         Brush.radialGradient(
                             colors = listOf(
-                                MaterialTheme.colorScheme.primary.copy(alpha = 0.05f),
+                                MaterialTheme.colorScheme.primary.copy(alpha = 0.08f),
                                 Color.Transparent
-                            ),
-                            radius = 2000f
+                            )
                         )
                     )
             )
@@ -195,52 +210,69 @@ class MainActivity : ComponentActivity() {
                     .fillMaxSize()
                     .padding(horizontal = 48.dp)
             ) {
-                // TOP BAR
+                // TOP BAR (Blended/Transparent)
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(vertical = 24.dp),
+                        .height(80.dp)
+                        .padding(top = 16.dp),
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
+                    // Logo Section
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier.clickable(onClick = {}) // Placeholder for menu
+                    ) {
                         Text(
                             text = "GAMETUX",
-                            fontSize = 24.sp,
+                            fontSize = 20.sp,
                             fontWeight = FontWeight.Black,
                             color = Color.White,
-                            letterSpacing = 2.sp
+                            letterSpacing = 1.sp
                         )
-                        Spacer(modifier = Modifier.width(16.dp))
+                        Spacer(modifier = Modifier.width(12.dp))
                         Box(
                             modifier = Modifier
                                 .clip(RoundedCornerShape(4.dp))
-                                .background(MaterialTheme.colorScheme.primary)
+                                .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.15f))
+                                .border(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.3f), RoundedCornerShape(4.dp))
                                 .padding(horizontal = 6.dp, vertical = 2.dp)
                         ) {
                             Text(
                                 text = "PRO",
-                                fontSize = 10.sp,
+                                fontSize = 9.sp,
                                 fontWeight = FontWeight.Bold,
-                                color = Color.Black
+                                color = MaterialTheme.colorScheme.primary
                             )
                         }
                     }
 
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        IconButton(onClick = onTvIconClick) {
+                    // Connection Status
+                    Surface(
+                        onClick = onTvIconClick,
+                        color = Color.White.copy(alpha = 0.05f),
+                        shape = RoundedCornerShape(12.dp),
+                        border = BorderStroke(1.dp, Color.White.copy(alpha = 0.05f))
+                    ) {
+                        Row(
+                            modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
                             Icon(
                                 imageVector = if (connectedDisplay != null) Icons.Default.Cast else Icons.Default.Wifi,
                                 contentDescription = "TV Connection",
-                                tint = if (connectedDisplay != null) MaterialTheme.colorScheme.primary else Color.White
+                                tint = if (connectedDisplay != null) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.secondary,
+                                modifier = Modifier.size(18.dp)
+                            )
+                            Spacer(modifier = Modifier.width(12.dp))
+                            Text(
+                                text = connectedDisplay?.host ?: "Searching Display...",
+                                fontSize = 13.sp,
+                                fontWeight = FontWeight.Medium,
+                                color = if (connectedDisplay != null) Color.White else MaterialTheme.colorScheme.secondary
                             )
                         }
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Text(
-                            text = connectedDisplay?.host ?: "No TV Connected",
-                            fontSize = 12.sp,
-                            color = Color.White.copy(alpha = 0.6f)
-                        )
                     }
                 }
 
@@ -291,27 +323,46 @@ class MainActivity : ComponentActivity() {
     fun RomCard(rom: RomItem, onClick: () -> Unit) {
         val interactionSource = remember { MutableInteractionSource() }
         val isFocused by interactionSource.collectIsFocusedAsState()
-        val scale by animateFloatAsState(if (isFocused) 1.05f else 1f, label = "scale")
+
+        // Premium Animations
+        val scale by animateFloatAsState(
+            targetValue = if (isFocused) 1.08f else 1f,
+            animationSpec = spring(stiffness = Spring.StiffnessLow),
+            label = "scale"
+        )
+        val glowAlpha by animateFloatAsState(if (isFocused) 0.5f else 0f, label = "glow")
         val borderColor by animateColorAsState(
-            if (isFocused) MaterialTheme.colorScheme.primary else Color.Transparent,
+            if (isFocused) MaterialTheme.colorScheme.primary else Color.White.copy(alpha = 0.05f),
             label = "border"
         )
-        val shadowAlpha by animateFloatAsState(if (isFocused) 0.6f else 0f, label = "shadow")
 
         Column(
             modifier = Modifier
-                .width(220.dp)
+                .width(200.dp)
+                .padding(vertical = 12.dp)
                 .scale(scale)
-                .clickable(interactionSource = interactionSource, indication = null, onClick = onClick),
+                .clickable(
+                    interactionSource = interactionSource,
+                    indication = null,
+                    onClick = onClick
+                ),
             horizontalAlignment = Alignment.Start
         ) {
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .aspectRatio(0.75f) // Portrait box art style
+                    .aspectRatio(0.72f) // Premium portrait ratio
+                    .border(1.5.dp, borderColor, RoundedCornerShape(20.dp))
+                    // Soft Outer Glow on Focus
+                    .then(
+                        if (isFocused) Modifier.border(
+                            4.dp,
+                            MaterialTheme.colorScheme.primary.copy(alpha = glowAlpha),
+                            RoundedCornerShape(20.dp)
+                        ) else Modifier
+                    )
                     .clip(RoundedCornerShape(20.dp))
-                    .background(MaterialTheme.colorScheme.surfaceVariant)
-                    .border(2.dp, borderColor, RoundedCornerShape(20.dp))
+                    .background(MaterialTheme.colorScheme.surface)
             ) {
                 // Background Placeholder with Blur/Vignette effect
                 Box(
@@ -378,18 +429,18 @@ class MainActivity : ComponentActivity() {
 
             Text(
                 text = rom.title,
-                fontSize = 18.sp,
-                fontWeight = FontWeight.Bold,
-                color = Color.White,
+                fontSize = 17.sp,
+                fontWeight = FontWeight.ExtraBold,
+                color = if (isFocused) MaterialTheme.colorScheme.primary else Color.White,
                 maxLines = 1,
                 modifier = Modifier.padding(horizontal = 4.dp)
             )
             Text(
-                text = "RETRO ADVENTURE",
-                fontSize = 11.sp,
-                fontWeight = FontWeight.Medium,
-                color = Color.White.copy(alpha = 0.5f),
-                letterSpacing = 1.sp,
+                text = rom.system,
+                fontSize = 12.sp,
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.secondary,
+                letterSpacing = 0.5.sp,
                 modifier = Modifier.padding(horizontal = 4.dp)
             )
         }
@@ -397,14 +448,24 @@ class MainActivity : ComponentActivity() {
 
     @Composable
     fun AddRomCard(onClick: () -> Unit) {
+        val interactionSource = remember { MutableInteractionSource() }
+        val isFocused by interactionSource.collectIsFocusedAsState()
+        val scale by animateFloatAsState(if (isFocused) 1.08f else 1f, label = "scale")
+
         Box(
             modifier = Modifier
-                .width(220.dp)
-                .aspectRatio(0.75f)
+                .width(200.dp)
+                .padding(vertical = 12.dp)
+                .scale(scale)
+                .aspectRatio(0.72f)
                 .clip(RoundedCornerShape(20.dp))
-                .background(Color.White.copy(alpha = 0.05f))
-                .border(2.dp, Color.White.copy(alpha = 0.1f), RoundedCornerShape(20.dp))
-                .clickable(onClick = onClick),
+                .background(Color.White.copy(alpha = 0.03f))
+                .border(1.5.dp, if (isFocused) MaterialTheme.colorScheme.primary else Color.White.copy(alpha = 0.05f), RoundedCornerShape(20.dp))
+                .clickable(
+                    interactionSource = interactionSource,
+                    indication = null,
+                    onClick = onClick
+                ),
             contentAlignment = Alignment.Center
         ) {
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
@@ -436,12 +497,12 @@ class MainActivity : ComponentActivity() {
         Dialog(onDismissRequest = onDismiss) {
             Surface(
                 modifier = Modifier
-                    .fillMaxWidth(0.7f)
+                    .fillMaxWidth(0.65f)
                     .wrapContentHeight(),
-                shape = RoundedCornerShape(32.dp),
-                color = Color(0xFF0F0F0F),
-                border = BorderStroke(1.dp, Color.White.copy(alpha = 0.05f)),
-                shadowElevation = 24.dp
+                shape = RoundedCornerShape(28.dp),
+                color = Color(0xFF15151D).copy(alpha = 0.95f), // Glass-like
+                border = BorderStroke(1.dp, Color.White.copy(alpha = 0.08f)),
+                shadowElevation = 32.dp
             ) {
                 Column(
                     modifier = Modifier.padding(32.dp)
@@ -463,16 +524,25 @@ class MainActivity : ComponentActivity() {
                     Spacer(modifier = Modifier.height(24.dp))
 
                     if (displays.isEmpty()) {
-                        Box(
+                        Column(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .height(120.dp),
-                            contentAlignment = Alignment.Center
+                                .height(140.dp),
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            verticalArrangement = Arrangement.Center
                         ) {
                             CircularProgressIndicator(
-                                modifier = Modifier.size(24.dp),
+                                modifier = Modifier.size(28.dp),
                                 color = MaterialTheme.colorScheme.primary,
-                                strokeWidth = 2.dp
+                                strokeWidth = 3.dp
+                            )
+                            Spacer(modifier = Modifier.height(16.dp))
+                            Text(
+                                "SCANNING LAN...",
+                                fontSize = 11.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = MaterialTheme.colorScheme.primary,
+                                letterSpacing = 2.sp
                             )
                         }
                     } else {
@@ -534,58 +604,124 @@ class MainActivity : ComponentActivity() {
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .background(Color.Black)
-                .padding(48.dp)
+                .background(Color(0xFF0B0B0F))
+                .padding(56.dp)
         ) {
-            // Header
+            // Header (Immersive)
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                IconButton(onClick = onExit) {
-                    Icon(Icons.Default.Add, contentDescription = "Exit", modifier = Modifier.scale(1.5f).background(Color.White.copy(0.1f), CircleShape), tint = Color.White)
+                IconButton(
+                    onClick = onExit,
+                    modifier = Modifier
+                        .size(48.dp)
+                        .clip(CircleShape)
+                        .background(Color.White.copy(alpha = 0.05f))
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Close,
+                        contentDescription = "Exit",
+                        tint = Color.White.copy(alpha = 0.5f),
+                        modifier = Modifier.size(20.dp)
+                    )
                 }
+
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    Text(rom.title, color = Color.White, fontWeight = FontWeight.Bold)
-                    Text(rom.system, color = Color.White.copy(0.5f), fontSize = 12.sp)
+                    Text(
+                        text = rom.title.uppercase(),
+                        color = Color.White,
+                        fontWeight = FontWeight.Black,
+                        fontSize = 14.sp,
+                        letterSpacing = 1.sp
+                    )
+                    Text(
+                        text = rom.system,
+                        color = MaterialTheme.colorScheme.primary,
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 10.sp,
+                        letterSpacing = 2.sp
+                    )
                 }
-                Spacer(modifier = Modifier.width(48.dp))
+
+                // Connection Indicator
+                Box(
+                    modifier = Modifier
+                        .size(48.dp)
+                        .clip(CircleShape)
+                        .background(Color.White.copy(alpha = 0.05f)),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .size(8.dp)
+                            .clip(CircleShape)
+                            .background(MaterialTheme.colorScheme.primary)
+                    )
+                }
             }
 
-            // D-Pad (Left Side)
+            // D-Pad (Refined Tactile Design)
             Box(
                 modifier = Modifier
                     .align(Alignment.CenterStart)
-                    .size(240.dp)
+                    .size(260.dp)
             ) {
-                // Cross Shape
-                val buttonSize = 80.dp
+                val buttonSize = 84.dp
                 ControllerButton("U", Modifier.align(Alignment.TopCenter).size(buttonSize), haptic)
                 ControllerButton("D", Modifier.align(Alignment.BottomCenter).size(buttonSize), haptic)
                 ControllerButton("L", Modifier.align(Alignment.CenterStart).size(buttonSize), haptic)
                 ControllerButton("R", Modifier.align(Alignment.CenterEnd).size(buttonSize), haptic)
             }
 
-            // Action Buttons (Right Side)
-            Row(
-                modifier = Modifier.align(Alignment.CenterEnd),
-                horizontalArrangement = Arrangement.spacedBy(24.dp)
+            // Action Buttons (Balanced Premium Design)
+            Box(
+                modifier = Modifier
+                    .align(Alignment.CenterEnd)
+                    .size(260.dp)
             ) {
-                ControllerButton("B", Modifier.size(96.dp), haptic, color = Color.White.copy(0.05f))
-                ControllerButton("A", Modifier.size(96.dp).offset(y = (-24).dp), haptic, color = MaterialTheme.colorScheme.primary)
+                val buttonSize = 100.dp
+                ControllerButton(
+                    label = "B",
+                    modifier = Modifier.align(Alignment.CenterStart).size(buttonSize),
+                    haptic = haptic,
+                    color = Color.White.copy(alpha = 0.04f)
+                )
+                ControllerButton(
+                    label = "A",
+                    modifier = Modifier.align(Alignment.TopEnd).size(buttonSize).offset(y = 20.dp),
+                    haptic = haptic,
+                    color = MaterialTheme.colorScheme.primary
+                )
             }
 
-            // Start/Select (Bottom Center)
+            // Start/Select (Minimal Console Style)
             Row(
                 modifier = Modifier.align(Alignment.BottomCenter),
-                horizontalArrangement = Arrangement.spacedBy(32.dp)
+                horizontalArrangement = Arrangement.spacedBy(40.dp)
             ) {
-                TextButton(onClick = { haptic.performHapticFeedback(HapticFeedbackType.LongPress) }) {
-                    Text("SELECT", color = Color.White.copy(0.5f), fontWeight = FontWeight.Bold)
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    Box(
+                        modifier = Modifier
+                            .size(56.dp, 28.dp)
+                            .clip(RoundedCornerShape(14.dp))
+                            .background(Color.White.copy(alpha = 0.05f))
+                            .clickable { haptic.performHapticFeedback(HapticFeedbackType.LongPress) }
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Text("SELECT", color = Color.White.copy(alpha = 0.3f), fontWeight = FontWeight.Bold, fontSize = 10.sp, letterSpacing = 1.sp)
                 }
-                TextButton(onClick = { haptic.performHapticFeedback(HapticFeedbackType.LongPress) }) {
-                    Text("START", color = Color.White.copy(0.5f), fontWeight = FontWeight.Bold)
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    Box(
+                        modifier = Modifier
+                            .size(56.dp, 28.dp)
+                            .clip(RoundedCornerShape(14.dp))
+                            .background(Color.White.copy(alpha = 0.05f))
+                            .clickable { haptic.performHapticFeedback(HapticFeedbackType.LongPress) }
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Text("START", color = Color.White.copy(alpha = 0.3f), fontWeight = FontWeight.Bold, fontSize = 10.sp, letterSpacing = 1.sp)
                 }
             }
         }
@@ -655,15 +791,15 @@ class MainActivity : ComponentActivity() {
         var ip by remember { mutableStateOf("") }
         Dialog(onDismissRequest = onDismiss) {
             Surface(
-                modifier = Modifier.fillMaxWidth(0.6f),
-                shape = RoundedCornerShape(32.dp),
-                color = Color(0xFF0F0F0F),
-                border = BorderStroke(1.dp, Color.White.copy(alpha = 0.05f)),
-                shadowElevation = 24.dp
+                modifier = Modifier.fillMaxWidth(0.55f),
+                shape = RoundedCornerShape(28.dp),
+                color = Color(0xFF15151D).copy(alpha = 0.95f),
+                border = BorderStroke(1.dp, Color.White.copy(alpha = 0.08f)),
+                shadowElevation = 32.dp
             ) {
                 Column(modifier = Modifier.padding(32.dp)) {
-                    Text("Manual IP", color = Color.White, fontSize = 22.sp, fontWeight = FontWeight.Black)
-                    Text("Enter display's IP address manually", color = Color.White.copy(alpha = 0.4f), fontSize = 13.sp)
+                    Text("Manual Connection", color = Color.White, fontSize = 22.sp, fontWeight = FontWeight.Black, letterSpacing = (-0.5).sp)
+                    Text("Enter display IP to connect directly", color = Color.White.copy(alpha = 0.4f), fontSize = 13.sp)
 
                     Spacer(modifier = Modifier.height(24.dp))
 
