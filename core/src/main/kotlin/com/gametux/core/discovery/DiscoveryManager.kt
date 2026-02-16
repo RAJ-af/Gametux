@@ -63,9 +63,11 @@ class DiscoveryManager(private val context: Context) {
     // --- NSD Browser (Phone Side) ---
 
     private var discoveryListener: NsdManager.DiscoveryListener? = null
+    private val discoveredDevices = mutableSetOf<String>()
 
     fun startDiscovery(onDisplayFound: (host: String, port: Int) -> Unit) {
         if (isBrowsing) return
+        discoveredDevices.clear()
 
         discoveryListener = object : NsdManager.DiscoveryListener {
             override fun onDiscoveryStarted(regType: String) {
@@ -79,8 +81,14 @@ class DiscoveryManager(private val context: Context) {
                             Log.e(TAG, "Resolve failed: $errorCode")
                         }
                         override fun onServiceResolved(serviceInfo: NsdServiceInfo) {
-                            Log.d(TAG, "Service resolved: ${serviceInfo.host}:${serviceInfo.port}")
-                            onDisplayFound(serviceInfo.host.hostAddress ?: "", serviceInfo.port)
+                            val host = serviceInfo.host.hostAddress ?: ""
+                            val port = serviceInfo.port
+                            val deviceId = "$host:$port"
+                            if (!discoveredDevices.contains(deviceId)) {
+                                discoveredDevices.add(deviceId)
+                                Log.d(TAG, "Service resolved: $deviceId")
+                                onDisplayFound(host, port)
+                            }
                         }
                     })
                 }
@@ -153,8 +161,13 @@ class DiscoveryManager(private val context: Context) {
                     socket.receive(packet)
                     val message = String(packet.data, 0, packet.length)
                     if (message.startsWith("GAMETUX_DISPLAY:")) {
+                        val host = packet.address.hostAddress ?: ""
                         val port = message.substringAfter(":").toIntOrNull() ?: 0
-                        onDisplayFound(packet.address.hostAddress ?: "", port)
+                        val deviceId = "$host:$port"
+                        if (!discoveredDevices.contains(deviceId)) {
+                            discoveredDevices.add(deviceId)
+                            onDisplayFound(host, port)
+                        }
                     }
                 }
             } catch (e: Exception) {

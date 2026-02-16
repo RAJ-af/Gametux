@@ -11,8 +11,10 @@ class WebRTCSender(
 ) {
     private val TAG = "WebRTCSender"
     private var peerConnection: PeerConnection? = null
+    private var surfaceTextureHelper: SurfaceTextureHelper? = null
+    private var videoSource: VideoSource? = null
 
-    fun start() {
+    fun start(eglContext: EglBase.Context, onSurfaceReady: (android.view.Surface) -> Unit) {
         val rtcConfig = PeerConnection.RTCConfiguration(emptyList())
         rtcConfig.sdpSemantics = PeerConnection.SdpSemantics.UNIFIED_PLAN
 
@@ -36,8 +38,19 @@ class WebRTCSender(
         })
 
         // Add Video Track
-        val videoSource = manager.createVideoSource(false)
-        val videoTrack = manager.createVideoTrack("VIDEO_TRACK", videoSource)
+        surfaceTextureHelper = SurfaceTextureHelper.create("CaptureThread", eglContext)
+        videoSource = manager.createVideoSource(false)
+        val videoTrack = manager.createVideoTrack("VIDEO_TRACK", videoSource!!)
+
+        surfaceTextureHelper?.startListening { frame ->
+            videoSource?.capturerObserver?.onFrameCaptured(frame)
+        }
+
+        val surfaceTexture = surfaceTextureHelper!!.surfaceTexture
+        // Set fixed size for emulator (e.g. 1280x720)
+        surfaceTexture.setDefaultBufferSize(1280, 720)
+        onSurfaceReady(android.view.Surface(surfaceTexture))
+
         peerConnection?.addTrack(videoTrack)
 
         // Add Audio Track
@@ -66,6 +79,9 @@ class WebRTCSender(
     }
 
     fun stop() {
+        surfaceTextureHelper?.stopListening()
+        surfaceTextureHelper?.dispose()
+        surfaceTextureHelper = null
         peerConnection?.dispose()
         peerConnection = null
     }
